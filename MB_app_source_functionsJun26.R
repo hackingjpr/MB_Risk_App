@@ -250,7 +250,7 @@ get_basenames <- function(dir){
 }
 
 extract.metagene <- function(index, weights, exp.matrix, scaling) {
-  exp.matrix[index, ] -> temp.exp
+  exp.matrix[index, , drop = FALSE] -> temp.exp
   apply(temp.exp, 2, function(x) {
     mean(x * weights)
   }) -> raw.metagene
