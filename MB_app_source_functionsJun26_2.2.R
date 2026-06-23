@@ -304,7 +304,7 @@ add_suffix <- function(number) {
 render_survival_plot <- function(metagene, score, covs, indexRow) {
   if (metagene == "SHH") {
     generate_survival_figure_shh(score, covs$mycn, indexRow)
-  } else if (metagene == "G3_G4_sub") {
+  } else if (metagene == "Group3/4 (Early)") {
     generate_survival_figure_G3_G4_sub(score, covs$myc, covs$mets, indexRow)
   } else {
     generate_survival_figure_G3_G4_no_sub(score, indexRow)
@@ -628,7 +628,7 @@ generate_figure_highlight_G3_G4_no_sub <- function(new.sample.meta.score, indexR
     geom_line() +
     scale_shape_manual(values = c(1, 4,  3)) +
     scale_color_manual(values = c('#E69F00', '#999999', "white")) +
-    ylab("G3_G4_no_sub") +
+    ylab("Group3/4 (Late)") +
     theme_minimal() +
     theme(
       axis.title.x = element_blank(),
@@ -948,7 +948,7 @@ generate_figure_highlight_G3_G4_sub <- function(new.sample.meta.score, indexRow)
     geom_line() +
     scale_shape_manual(values = c(1, 4,  3)) +
     scale_color_manual(values = c('#E69F00', '#999999', "white")) +
-    ylab("G3_G4_sub") +
+    ylab("Group3/4 (Early)") +
     theme_minimal() +
     theme(
       #axis.title.x = element_blank(),
@@ -1040,6 +1040,10 @@ generate_figure_highlight_G3_G4_sub <- function(new.sample.meta.score, indexRow)
 }
 
 generate_survival_figure_G3_G4_sub <- function(new.sample.meta.score, myc, mets_val, indexRow) {
+  message("=== G3_G4_sub plot called ===")
+  message("myc values: ", paste(myc, collapse=", "))
+  message("mets values: ", paste(mets_val, collapse=", "))
+  message("indexRow: ", indexRow)
   if (is.null(indexRow)) indexRow <- 1
   
   df2 <- data.frame(surv = .g34early_df$surv5)
@@ -1058,7 +1062,7 @@ generate_survival_figure_G3_G4_sub <- function(new.sample.meta.score, myc, mets_
   new_surv <- as.numeric(summary(fit, time = 5)$surv)
   
   if (length(new_surv) == 0 || all(is.na(new_surv))) {
-    message("Warning: no survival estimate at time=5 for G3_G4_sub")
+    message("Warning: no survival estimate at time=5 for Group3/4 (Early)")
     new_surv <- rep(NA_real_, length(new.sample.meta.score))
   }
   

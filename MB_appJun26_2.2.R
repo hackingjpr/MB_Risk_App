@@ -312,7 +312,15 @@ server <- function(input, output, session) {
     if (!is.null(input$covariate_table)) {
       edited <- hot_to_r(input$covariate_table)
       
+      message("=== UPDATE BUTTON CLICKED ===")
+      message("Metagene: ", metagene)
+      message("Edited table:")
+      print(edited)
+      
       covs <- survInputs$covariates
+      
+      message("Covariates BEFORE update:")
+      print(covs)
       
       if (metagene == "SHH") {
         covs$mycn <- as.integer(edited$MYCN_Amplified)
@@ -322,7 +330,12 @@ server <- function(input, output, session) {
         covs$mets <- as.integer(edited$Metastatic)
       }
       
+      message("Covariates AFTER update:")
+      print(covs)
+      
       survInputs$covariates <- covs
+    } else {
+      message("covariate_table is NULL — table not being read")
     }
   })
   
