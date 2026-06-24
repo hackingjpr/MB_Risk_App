@@ -103,7 +103,7 @@ clean install up front is faster and more reliable.
 ## Quick start (Shiny app)
 
 ```r
-shiny::runApp("MB_appJun26_4.R")
+shiny::runApp("MB_appJun26_2.2.R")
 ```
 
 Then in the browser:
@@ -124,7 +124,7 @@ Then in the browser:
 For batch use or reproducible pipelines, adapt `ExampleDataScript.R`:
 
 ```r
-source("./MB_app_source_functionsJun26.R")
+source("./MB_app_source_functionsJun26_2.5.R")
 
 # Folder containing the IDAT pairs
 idats     <- "/path/to/idat/folder"
@@ -205,7 +205,7 @@ distributions, and survival models here are specific to medulloblastoma.
 
 ## License
 
-*[LICENSE — ]*
+*[AGPL-3.0]*
 
 ## Contact
 
@@ -214,20 +214,12 @@ Ed Schwalbe ed.schwalbe@northumrbia.ac.uk (corresponding authors) /
 James Hacking james.hacking@ncl.ac.uk (repository maintainer)]*
 
 
-
-# Overview
-Lorem Ipsum
-
-# Background
-Lorem Ipsum
-
-
 # System Requirements
 ### Hardware Requirements
 Functions provided here are compatible with any standard computer with enough RAM to support the in-memory operations.
                 
 ### Software Requirements
-Functions provided import and depend on a number of R packages. Functionality has been tested on *R 4.0.4* with *Ubuntu 20.04.2 LTS*
+Functions provided import and depend on a number of R packages. Functionality has been tested on *R 4.5.2* with *Ubuntu 24.04.3 LTS*
                   
                   
                   
