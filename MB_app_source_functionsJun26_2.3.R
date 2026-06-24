@@ -183,14 +183,59 @@ readRDS(file = "./mb_app/G3_G4_no_subgroup.model.rds") -> G3_G4_no_sub
  # all.meth.os.meta.n13.extract -> ALL
  
  # ── Load pre-computed survival objects ───────────────────────────────────────
- .shh_df         <- readRDS("~/MB_Risk_App/mb_app/precomp_shh_df.rds")
- .shh_fit        <- readRDS("~/MB_Risk_App/mb_app/precomp_shh_fit.rds")
  
- .g34late_df     <- readRDS("~/MB_Risk_App/mb_app/precomp_g34late_df.rds")
- .g34late_fit    <- readRDS("~/MB_Risk_App/mb_app/precomp_g34late_fit.rds")
+ # ── Load pre-computed survival objects ───────────────────────────────────────
  
- .g34early_df    <- readRDS("~/MB_Risk_App/mb_app/precomp_g34early_df.rds")
- .g34early_fit   <- readRDS("~/MB_Risk_App/mb_app/precomp_g34early_fit.rds")
+ # SHH
+ .shh_df  <- readRDS("~/MB_Risk_App/mb_app/precomp_shh_df.rds")
+ .shh_fit <- readRDS("~/MB_Risk_App/mb_app/precomp_shh_fit.rds")
+ 
+ .shh_env <- new.env(parent = baseenv())
+ .shh_env$surv.object.train.shh <- Surv(.shh_df$OS_Time, .shh_df$OS_Status)
+ .shh_env$fixedMG               <- .shh_df$fixedMG
+ .shh_env$ConsensusMYCN         <- .shh_df$ConsensusMYCN
+ environment(.shh_fit$terms)    <- .shh_env
+ 
+ # G3G4 late
+ .g34late_df  <- readRDS("~/MB_Risk_App/mb_app/precomp_g34late_df.rds")
+ .g34late_fit <- readRDS("~/MB_Risk_App/mb_app/precomp_g34late_fit.rds")
+ 
+ .g34late_env <- new.env(parent = baseenv())
+ .g34late_env$surv.object.train.late <- Surv(.g34late_df$OS_Time, .g34late_df$OS_Status)
+ .g34late_env$fixedMG                <- .g34late_df$fixedMG
+ environment(.g34late_fit$terms)     <- .g34late_env
+ 
+ # G3G4 early
+ .g34early_df  <- readRDS("~/MB_Risk_App/mb_app/precomp_g34early_df.rds")
+ .g34early_fit <- readRDS("~/MB_Risk_App/mb_app/precomp_g34early_fit.rds")
+ 
+ .g34early_df$ConsensusMYC <- factor(
+   .g34early_df$ConsensusMYC,
+   levels = .g34early_fit$xlevels[["strata(ConsensusMYC)"]]
+ )
+ 
+ .g34early_env <- new.env(parent = baseenv())
+ .g34early_env$surv.object.train <- Surv(.g34early_df$OS_Time, .g34early_df$OS_Status)
+ .g34early_env$fixedMG           <- .g34early_df$fixedMG
+ .g34early_env$M._versus_M.      <- .g34early_df$M._versus_M.
+ .g34early_env$ConsensusMYC      <- .g34early_df$ConsensusMYC
+ .g34early_env$strata            <- survival::strata
+ environment(.g34early_fit$terms) <- .g34early_env
+ 
+ message("Survival objects loaded.")
+
+
+ 
+ surv.object.train               <- Surv(.g34early_df$OS_Time, .g34early_df$OS_Status)
+ df.pheno.mb.combined.grp3.grp4 <- .g34early_df
+ 
+ env <- environment(.g34early_fit$terms)
+ env$surv.object.train <- surv.object.train
+ env$fixedMG           <- .g34early_df$fixedMG
+ env$M._versus_M.      <- .g34early_df$M._versus_M.
+ env$ConsensusMYC      <- .g34early_df$ConsensusMYC
+ 
+ message("Survival objects loaded.")
  
  message("Survival objects loaded.")
 
@@ -320,52 +365,52 @@ render_survival_plot <- function(metagene, score, covs, indexRow) {
 # }
 
 # G3_G4_sub — fixedMG + MYC + metastasis
-generate_survival_figure_G3_G4_sub_with_covariates <- function(score_vec, indexRow, myc, mets_val) {
-  
-  train.fit <- readRDS("~/MB_Risk_App/mb_app/g34early19.train.fit.rds")
-  df.pheno  <- read.csv("~/MB_Risk_App/mb_app/df.pheno.mb.combined.grp3.grp4.csv")
-  
-  # Apply the same factor-cleaning you already have
-  df.pheno$M._versus_M.[is.na(df.pheno$M._versus_M.)] <- 0
-  df.pheno$ConsensusMYC <- gsub("^ConsensusMYC=", "", df.pheno$ConsensusMYC)
-  df.pheno$ConsensusMYC[is.na(df.pheno$ConsensusMYC)] <- "0"
-  df.pheno$ConsensusMYC <- factor(
-    paste0("ConsensusMYC=", df.pheno$ConsensusMYC),
-    levels = train.fit$xlevels[["strata(ConsensusMYC)"]]
-  )
-  
-  # Override the selected sample's covariates with the checkbox values
-  # (indexRow is 1-based; score_vec is named)
-  newdata <- data.frame(
-    fixedMG        = df.pheno$fixedMG,
-    M._versus_M.   = df.pheno$M._versus_M.,
-    ConsensusMYC   = factor(df.pheno$ConsensusMYC,
-                            levels = train.fit$xlevels[["strata(ConsensusMYC)"]])
-  )
-  
-  # Patch the row corresponding to the uploaded sample with user-selected covariates.
-  # We append the new sample as an extra row rather than overwrite training data:
-  new_row <- data.frame(
-    fixedMG      = as.numeric(score_vec)[indexRow],
-    M._versus_M. = mets_val,
-    ConsensusMYC = factor(paste0("ConsensusMYC=", myc),
-                          levels = train.fit$xlevels[["strata(ConsensusMYC)"]])
-  )
-  newdata_with_new <- rbind(newdata, new_row)
-  
-  x <- summary(survfit(train.fit, newdata = newdata_with_new), time = 5)
-  
-  df2 <- data.frame(
-    pred = c(df.pheno$fixedMG, as.numeric(score_vec)[indexRow]),
-    surv = as.numeric(x$surv),
-    up   = as.numeric(x$upper),
-    lo   = as.numeric(x$lower)
-  )
-  
-  # The new sample is the last row — highlight it
-  new_sample_est <- df2$surv[nrow(df2)]
-  generate_survival_figure_G3_G4_sub(new_sample_est, indexRow = nrow(df2))
-}
+# generate_survival_figure_G3_G4_sub_with_covariates <- function(score_vec, indexRow, myc, mets_val) {
+#   
+#   train.fit <- readRDS("~/MB_Risk_App/mb_app/g34early19.train.fit.rds")
+#   df.pheno  <- read.csv("~/MB_Risk_App/mb_app/df.pheno.mb.combined.grp3.grp4.csv")
+#   
+#   # Apply the same factor-cleaning you already have
+#   df.pheno$M._versus_M.[is.na(df.pheno$M._versus_M.)] <- 0
+#   df.pheno$ConsensusMYC <- gsub("^ConsensusMYC=", "", df.pheno$ConsensusMYC)
+#   df.pheno$ConsensusMYC[is.na(df.pheno$ConsensusMYC)] <- "0"
+#   df.pheno$ConsensusMYC <- factor(
+#     paste0("ConsensusMYC=", df.pheno$ConsensusMYC),
+#     levels = train.fit$xlevels[["strata(ConsensusMYC)"]]
+#   )
+#   
+#   # Override the selected sample's covariates with the checkbox values
+#   # (indexRow is 1-based; score_vec is named)
+#   newdata <- data.frame(
+#     fixedMG        = df.pheno$fixedMG,
+#     M._versus_M.   = df.pheno$M._versus_M.,
+#     ConsensusMYC   = factor(df.pheno$ConsensusMYC,
+#                             levels = train.fit$xlevels[["strata(ConsensusMYC)"]])
+#   )
+#   
+#   # Patch the row corresponding to the uploaded sample with user-selected covariates.
+#   # We append the new sample as an extra row rather than overwrite training data:
+#   new_row <- data.frame(
+#     fixedMG      = as.numeric(score_vec)[indexRow],
+#     M._versus_M. = mets_val,
+#     ConsensusMYC = factor(paste0("ConsensusMYC=", myc),
+#                           levels = train.fit$xlevels[["strata(ConsensusMYC)"]])
+#   )
+#   newdata_with_new <- rbind(newdata, new_row)
+#   
+#   x <- summary(survfit(train.fit, newdata = newdata_with_new), time = 5)
+#   
+#   df2 <- data.frame(
+#     pred = c(df.pheno$fixedMG, as.numeric(score_vec)[indexRow]),
+#     surv = as.numeric(x$surv),
+#     up   = as.numeric(x$upper),
+#     lo   = as.numeric(x$lower)
+#   )
+#   
+#   # The new sample is the last row — highlight it
+#   new_sample_est <- df2$surv[nrow(df2)]
+#   generate_survival_figure_G3_G4_sub(new_sample_est, indexRow = nrow(df2))
+# }
 
 
 
@@ -532,22 +577,22 @@ generate_figure_highlight_SHH <- function(new.sample.meta.score, indexRow) {
 #}
 
 # makes test data
-new.sample.meta.score = c(0.2,0.3,0.4)
-new.sample.MYCN.status = c(0,1,1)
-new.sample.MYC.status = c(0,0,0)
-new.sample.mets.status = c(0,0,0)
+#new.sample.meta.score = c(0.2,0.3,0.4)
+#new.sample.MYCN.status = c(0,1,1)
+#new.sample.MYC.status = c(0,0,0)
+#new.sample.mets.status = c(0,0,0)####
 
-new.sample.meta.data <- data.frame(new.sample.meta.score = new.sample.meta.score,
-           new.sample.MYCN.status = new.sample.MYCN.status,
-           new.sample.MYC.status = new.sample.MYC.status,
-           new.sample.mets.status = new.sample.mets.status
-           )
+#new.sample.meta.data <- data.frame(new.sample.meta.score = new.sample.meta.score,
+#           new.sample.MYCN.status = new.sample.MYCN.status,
+#           new.sample.MYC.status = new.sample.MYC.status,
+#           new.sample.mets.status = new.sample.mets.status
+#           )#
 
 # generateSHHest <- function(new.sample.meta.data){
 # 
 # train.fit <- readRDS(file = "~/MB_Risk_App/mb_app/shh49.train.fit.rds")
-surv.object.train.shh <- readRDS(file = "~/MB_Risk_App/mb_app/surv.object.train.shh.rds")
-df.pheno.mb.combined.shh <- read.csv(file = "~/MB_Risk_App/mb_app/df.pheno.mb.combined.shh.csv")
+#surv.object.train.shh <- readRDS(file = "~/MB_Risk_App/mb_app/surv.object.train.shh.rds")
+#df.pheno.mb.combined.shh <- read.csv(file = "~/MB_Risk_App/mb_app/df.pheno.mb.combined.shh.stripped.csv")
 # 
 # summary(survfit(train.fit, data.frame(fixedMG=new.sample.meta.data$new.sample.meta.score, ConsensusMYCN=new.sample.meta.data$new.sample.MYCN.status)), time = 5) -> x
 # df2 <- data.frame(surv = as.numeric(x$surv),

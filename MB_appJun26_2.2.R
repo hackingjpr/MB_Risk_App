@@ -1,4 +1,4 @@
-source("./MB_app_source_functionsJun26_2.2.R")
+source("./MB_app_source_functionsJun26_2.5.R")
 
 library(shiny)
 library(shinydashboard)
@@ -222,7 +222,7 @@ ui <- fluidPage(
                   ),
                   
                   tabPanel("Download",
-                           textInput("filename", "Filename", "M-values"),
+                           textInput("filename", "Filename", "Risk-Values"),
                            radioButtons("download", "File type", c("csv", "pdf")),
                            downloadButton("down", "Download results")
                   )

@@ -17,6 +17,20 @@ saveRDS(shh_df,        "~/MB_Risk_App/mb_app/precomp_shh_df.rds")
 saveRDS(shh_train_fit, "~/MB_Risk_App/mb_app/precomp_shh_fit.rds")
 message("SHH saved.")
 
+
+
+shh_train_fit <- readRDS("~/MB_Risk_App/mb_app/shh49.train.fit.rds")
+shh_df_stripped <- read.csv("~/MB_Risk_App/mb_app/df.pheno.mb.combined.shh.stripped.csv")
+
+surv.object.train.shh <- Surv(shh_df_stripped$OS_Time, shh_df_stripped$OS_Status)
+
+# This will tell you exactly which columns are missing
+test_fit <- update(shh_train_fit, data = shh_df_stripped)
+
+
+
+
+
 # ── G3G4 no subgroup ────────────────────────────────────────────────────────
 g34late_fit <- readRDS("~/MB_Risk_App/mb_app/g34late49.train.fit.rds")
 g34late_df  <- read.csv("~/MB_Risk_App/mb_app/df.pheno.mb.combined.grp3.grp4.late.csv")
