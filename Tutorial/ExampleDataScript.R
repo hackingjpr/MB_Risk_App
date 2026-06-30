@@ -1,57 +1,157 @@
-### Set working directory to wherever "source_functions.R" is
-setwd("/example/Idat-Shiny")
-source("./source_functions.R")
+# --------------------------------------------------
+# User settings
+# --------------------------------------------------
 
-### Choose folder containing idats to be processed
+idat_dir <- "~/Idats/Mix"
 
-baseDir <- system.file("extdata", package = "minfiData")
-list.files(baseDir)
+metagene_name <- "SHH"
+# metagene_name <- "Group3/4 (Early)"
+# metagene_name <- "Group3/4 (Late)"
 
-idats <- (file.path(baseDir, "5723646052"))
+# --------------------------------------------------
+# Optional covariates
+# --------------------------------------------------
 
+# SHH
+MYCN_Amplified <- 0
 
-### Get Basenames
-temp.base <- get_basenames(idats)
+# Group3/4 Early
+MYC_Amplified <- 0
+Metastatic <- 0
 
-### Process Idats
+# --------------------------------------------------
+# Process IDATs
+# --------------------------------------------------
+
+temp.base <- get_basenames(idat_dir)
+
 temp.processed <- process_idats(temp.base)
 
-### Select metagene set
-# For MRT
-metagene <- ALL
-#For ATRT
-#metagene <- ATRT
-#For ECRT
-#metagene <- ECRT
-
-### Extract Metagenes (This will be your risk values result)
-test.res <- extract.metagene(
-  as.character(metagene[[1]]$genes),
-  as.numeric(metagene[[1]]$weights),
-  beta2m(temp.processed$betas),
-  as.numeric(metagene[[2]])
+meta <- switch(
+  metagene_name,
+  "SHH"              = SHH,
+  "Group3/4 (Early)" = G3_G4_sub,
+  "Group3/4 (Late)"  = G3_G4_no_sub
 )
 
-### Round results to 3 figures
-round(test.res, digits = 3)
+test.res <- extract.metagene(
+  as.character(meta[[1]]$genes),
+  as.numeric(meta[[1]]$weights),
+  beta2m(temp.processed$betas),
+  as.numeric(meta[[2]])
+)
 
-#For ALL should give : -0.325, -0.416, 0.222
-#For ATRT should give : -1.423, -1.373, -1.678
-#For ECRT should give : -0.071, -0.033, -0.122
+test.res <- round(test.res, 3)
 
-### Select Risk values column
+print(test.res)
+
 figure.input <- test.res$Risk_Value
-
-### Name the rows
 names(figure.input) <- rownames(test.res)
-print(figure.input)
 
-### Pick the generate_figure_highlight that is required
-generate_figure_highlight_mrt(figure.input,
-                              NA)
+# --------------------------------------------------
+# Risk distribution plot
+# --------------------------------------------------
 
-# generate_figure_highlight_atrt(figure.input,
-#                                NA)
+risk_plot <- switch(
+  metagene_name,
+  "SHH" = generate_figure_highlight_SHH(
+    figure.input,
+    1
+  ),
+  "Group3/4 (Early)" = generate_figure_highlight_G3_G4_sub(
+    figure.input,
+    1
+  ),
+  "Group3/4 (Late)" = generate_figure_highlight_G3_G4_no_sub(
+    figure.input,
+    1
+  )
+)
 
-# generate_figure_highlight_ecrt(figure.input,
-#                                NA)
+print(risk_plot)
+
+# --------------------------------------------------
+# Survival estimate
+# --------------------------------------------------
+
+if (metagene_name == "SHH") {
+  
+  fit <- survfit(
+    .shh_fit,
+    newdata = data.frame(
+      fixedMG = as.numeric(figure.input),
+      ConsensusMYCN = MYCN_Amplified
+    )
+  )
+  
+  surv_value <- summary(fit, time = 5)$surv
+  
+  cat(
+    "\nEstimated 5-year survival (%)\n"
+  )
+  
+  print(round(100 * surv_value, 1))
+  
+  surv_plot <- generate_survival_figure_shh(
+    figure.input,
+    MYCN_Amplified,
+    1
+  )
+  
+  print(surv_plot)
+  
+} else if (metagene_name == "Group3/4 (Early)") {
+  
+  surv_plot <- generate_survival_figure_G3_G4_sub(
+    figure.input,
+    MYC_Amplified,
+    Metastatic,
+    1
+  )
+  
+  print(surv_plot)
+  
+  fit <- survfit(
+    .g34early_fit,
+    newdata = data.frame(
+      fixedMG = as.numeric(figure.input),
+      M._versus_M. = Metastatic,
+      ConsensusMYC = factor(
+        paste0("ConsensusMYC=", MYC_Amplified),
+        levels = .g34early_fit$xlevels[["strata(ConsensusMYC)"]]
+      )
+    )
+  )
+  
+  surv_value <- summary(fit, time = 5)$surv
+  
+  cat(
+    "\nEstimated 5-year survival (%)\n"
+  )
+  
+  print(round(100 * surv_value, 1))
+  
+} else {
+  
+  surv_plot <- generate_survival_figure_G3_G4_no_sub(
+    figure.input,
+    1
+  )
+  
+  print(surv_plot)
+  
+  fit <- survfit(
+    .g34late_fit,
+    newdata = data.frame(
+      fixedMG = as.numeric(figure.input)
+    )
+  )
+  
+  surv_value <- summary(fit, time = 10)$surv
+  
+  cat(
+    "\nEstimated 10-year survival (%)\n"
+  )
+  
+  print(round(100 * surv_value, 1))
+}
