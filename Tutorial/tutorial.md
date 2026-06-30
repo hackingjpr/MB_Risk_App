@@ -10,8 +10,8 @@ so we recommend batches of ~10 samples for the best experience.
 Select the model appropriate for your samples. Three models are available:
 
 - **SHH** — for Sonic Hedgehog subgroup medulloblastoma
-- **Group3/4 (Early)** — for Group 3/4 medulloblastoma with subgroup information available
-- **Group3/4 (Late)** — for Group 3/4 medulloblastoma without subgroup information
+- **Group3/4 (Early)** — for Group 3/4 medulloblastoma - metaCpG for predicting OS at 5 years
+- **Group3/4 (Late)** — for Group 3/4 medulloblastoma - metaCpG for predicting OS at 10 years
 
 ![Model](Step2_Model.png)
 
