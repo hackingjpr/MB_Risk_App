@@ -2,8 +2,9 @@
 # User settings
 # --------------------------------------------------
 
-idat_dir <- "~/Idats/Mix"
+idat_dir <- "./idats" #Change this to be the path to your directory that contains your idats of interest
 
+#select the metagene you are interested in, comment out the others
 metagene_name <- "SHH"
 # metagene_name <- "Group3/4 (Early)"
 # metagene_name <- "Group3/4 (Late)"
@@ -13,11 +14,11 @@ metagene_name <- "SHH"
 # --------------------------------------------------
 
 # SHH
-MYCN_Amplified <- 0
+MYCN_Amplified <- 0 #0=no, 1=yes
 
 # Group3/4 Early
-MYC_Amplified <- 0
-Metastatic <- 0
+MYC_Amplified <- 0 #0=no, 1=yes
+Metastatic <- 0 #0=no, 1=yes
 
 # --------------------------------------------------
 # Process IDATs
