@@ -756,6 +756,54 @@ run_MB_risk_calculator <- function(
     "Group3/4 (Late)" = G3_G4_no_sub
   )
   
+  # --------------------------------------------------
+  # Validate covariates
+  # --------------------------------------------------
+  
+  if (metagene == "SHH") {
+    
+    if (MYC_Amplified != 0 || Metastatic != 0) {
+      stop(
+        paste(
+          "Group3/4 covariates were supplied for the SHH model.",
+          "Use only MYCN_Amplified with metagene = 'SHH'."
+        )
+      )
+    }
+    
+  }
+  
+  if (metagene == "Group3/4 (Early)") {
+    
+    if (MYCN_Amplified != 0) {
+      stop(
+        paste(
+          "MYCN_Amplified is only valid for the SHH model.",
+          "Remove MYCN_Amplified or set it to 0."
+        )
+      )
+    }
+    
+  }
+  
+  if (metagene == "Group3/4 (Late)") {
+    
+    if (MYCN_Amplified != 0 ||
+        MYC_Amplified != 0 ||
+        Metastatic != 0) {
+      
+      stop(
+        paste(
+          "Group3/4 (Late) does not use any covariates.",
+          "Set MYCN_Amplified = 0,",
+          "MYC_Amplified = 0 and",
+          "Metastatic = 0."
+        )
+      )
+    }
+    
+  }
+  
   # Calculate risk score
   test.res <- extract.metagene(
     as.character(meta[[1]]$genes),
@@ -765,6 +813,14 @@ run_MB_risk_calculator <- function(
   )
   
   test.res <- round(test.res, 3)
+  
+  
+  cat("\n========================\n")
+  cat("Model:", metagene, "\n")
+  cat("========================\n\n")
+  
+  print(test.res)
+  
   
   figure.input <- test.res$Risk_Value
   names(figure.input) <- rownames(test.res)
