@@ -730,3 +730,142 @@ generate_survival_figure_G3_G4_sub <- function(new.sample.meta.score, myc, mets_
     xlim(0, 1) +
     theme(legend.position = "none", text = element_text(size = 15))
 }
+
+
+#for running without shiny
+
+run_MB_risk_calculator <- function(
+    idat_dir,
+    metagene = c("SHH", "Group3/4 (Early)", "Group3/4 (Late)"),
+    MYCN_Amplified = 0,
+    MYC_Amplified = 0,
+    Metastatic = 0
+) {
+  
+  metagene <- match.arg(metagene)
+  
+  # Process IDATs
+  temp.base <- get_basenames(idat_dir)
+  temp.processed <- process_idats(temp.base)
+  
+  # Select model
+  meta <- switch(
+    metagene,
+    "SHH" = SHH,
+    "Group3/4 (Early)" = G3_G4_sub,
+    "Group3/4 (Late)" = G3_G4_no_sub
+  )
+  
+  # Calculate risk score
+  test.res <- extract.metagene(
+    as.character(meta[[1]]$genes),
+    as.numeric(meta[[1]]$weights),
+    beta2m(temp.processed$betas),
+    as.numeric(meta[[2]])
+  )
+  
+  test.res <- round(test.res, 3)
+  
+  figure.input <- test.res$Risk_Value
+  names(figure.input) <- rownames(test.res)
+  
+  # Risk plot
+  risk_plot <- switch(
+    metagene,
+    "SHH" =
+      generate_figure_highlight_SHH(figure.input, 1),
+    
+    "Group3/4 (Early)" =
+      generate_figure_highlight_G3_G4_sub(figure.input, 1),
+    
+    "Group3/4 (Late)" =
+      generate_figure_highlight_G3_G4_no_sub(figure.input, 1)
+  )
+  
+  print(risk_plot)
+  
+  # Survival calculations
+  if (metagene == "SHH") {
+    
+    fit <- survfit(
+      .shh_fit,
+      newdata = data.frame(
+        fixedMG = as.numeric(figure.input),
+        ConsensusMYCN = MYCN_Amplified
+      )
+    )
+    
+    surv_value <- summary(fit, time = 5)$surv
+    
+    surv_plot <- generate_survival_figure_shh(
+      figure.input,
+      MYCN_Amplified,
+      1
+    )
+    
+    timepoint <- "5-year"
+    
+  } else if (metagene == "Group3/4 (Early)") {
+    
+    fit <- survfit(
+      .g34early_fit,
+      newdata = data.frame(
+        fixedMG = as.numeric(figure.input),
+        M._versus_M. = Metastatic,
+        ConsensusMYC = factor(
+          paste0("ConsensusMYC=", MYC_Amplified),
+          levels = .g34early_fit$xlevels[["strata(ConsensusMYC)"]]
+        )
+      )
+    )
+    
+    surv_value <- summary(fit, time = 5)$surv
+    
+    surv_plot <- generate_survival_figure_G3_G4_sub(
+      figure.input,
+      MYC_Amplified,
+      Metastatic,
+      1
+    )
+    
+    timepoint <- "5-year"
+    
+  } else {
+    
+    fit <- survfit(
+      .g34late_fit,
+      newdata = data.frame(
+        fixedMG = as.numeric(figure.input)
+      )
+    )
+    
+    surv_value <- summary(fit, time = 10)$surv
+    
+    surv_plot <- generate_survival_figure_G3_G4_no_sub(
+      figure.input,
+      1
+    )
+    
+    timepoint <- "10-year"
+  }
+  
+  print(surv_plot)
+  
+  cat(
+    paste0(
+      "\nEstimated ", timepoint,
+      " survival (%)\n"
+    )
+  )
+  
+  print(round(100 * surv_value, 1))
+  
+  return(
+    list(
+      risk_scores = test.res,
+      survival_probability = surv_value,
+      risk_plot = risk_plot,
+      survival_plot = surv_plot
+    )
+  )
+}
