@@ -49,17 +49,15 @@ alongside the early 5-year estimate.
 
 ```
 .
-├── MB_appJun26_4.R                 # Shiny app entry point (UI + server)
-├── MB_app_source_functionsJun26.R  # Package loading, processing & plotting functions
-├── create_cox_models.r             # Builds the Cox OS models from phenotype CSVs
+├── app.R                 # Shiny app entry point (UI + server)
+├── source_functions.R  # Package loading, processing & plotting functions
 ├── ExampleDataScript.R             # Headless, scriptable end-to-end example
 ├── introduction.md                 # Intro tab content
 ├── Tutorial/tutorial.md            # Tutorial tab content
-├── www/MB_risk.jpg                 # Sidebar logo
 └── mb_app/
     ├── SHHn49.model.rds            # SHH signature: CpGs, weights, scaling
-    ├── G3_G4_subgroup.model.rds    # G3/4 (subgroup-aware) signature
-    ├── G3_G4_no_subgroup.model.rds # G3/4 (combined) signature
+    ├── G3_G4_subgroup.model.rds    # G3/4 (Early) signature
+    ├── G3_G4_no_subgroup.model.rds # G3/4 (Late) signature
     ├── *.dist.rds                  # Reference-cohort score distributions
     ├── shh49.train.fit.rds         # Cox model: SHH 5-year OS
     ├── g34early19.train.fit.rds    # Cox model: G3/4 early 5-year OS
@@ -103,7 +101,9 @@ clean install up front is faster and more reliable.
 ## Quick start (Shiny app)
 
 ```r
-shiny::runApp("MB_appJun26_2.2.R")
+#set working directory to where the github clone of MB_Risk_App is and then run:
+
+runApp("./")
 ```
 
 Then in the browser:
@@ -124,24 +124,19 @@ Then in the browser:
 For batch use or reproducible pipelines, adapt `ExampleDataScript.R`:
 
 ```r
-source("./MB_app_source_functionsJun26_2.5.R")
+source("./source_functions.R")
 
-# Folder containing the IDAT pairs
-idats     <- "/path/to/idat/folder"
-temp.base <- get_basenames(idats)
-processed <- process_idats(temp.base)
+#N.B. SHH can be 0 or 1 for MYCN_Amplified
+#     Group3/4 (Early) can be 0 or 1 for MYC_Amplified and/or Metastatic
+#     Group3/4 (Late) is 0 for all 3.
 
-# Choose a signature
-meta <- SHH        # or G3_G4_sub / G3_G4_no_sub
-
-# Compute the metaCpG score
-res <- extract.metagene(
-  as.character(meta[[1]]$genes),
-  as.numeric(meta[[1]]$weights),
-  beta2m(processed$betas),
-  as.numeric(meta[[2]])
+results <- run_MB_risk_calculator(
+  idat_dir = "/idats", #directory where your idat files are found
+  metagene = "Group3/4 (Late)",
+  MYC_Amplified = 0,
+  Metastatic =0,
+  MYCN_Amplified = 0
 )
-round(res, 3)
 ```
 
 A built-in sanity check uses the `minfiData` example arrays; expected values for
