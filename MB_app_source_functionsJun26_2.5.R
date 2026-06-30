@@ -79,8 +79,8 @@ readRDS(file = "./mb_app/G3_G4_no_subgroup.model.rds") -> G3_G4_no_sub
  # ── Load pre-computed survival objects ───────────────────────────────────────
  
  # SHH
- .shh_df  <- readRDS("~/MB_Risk_App/mb_app/precomp_shh_df.rds")
- .shh_fit <- readRDS("~/MB_Risk_App/mb_app/precomp_shh_fit.rds")
+ .shh_df  <- readRDS("./mb_app/precomp_shh_df.rds")
+ .shh_fit <- readRDS("./mb_app/precomp_shh_fit.rds")
  
  .shh_env <- new.env(parent = baseenv())
  .shh_env$surv.object.train.shh <- Surv(.shh_df$OS_Time, .shh_df$OS_Status)
@@ -89,8 +89,8 @@ readRDS(file = "./mb_app/G3_G4_no_subgroup.model.rds") -> G3_G4_no_sub
  environment(.shh_fit$terms)    <- .shh_env
  
  # G3G4 late
- .g34late_df  <- readRDS("~/MB_Risk_App/mb_app/precomp_g34late_df.rds")
- .g34late_fit <- readRDS("~/MB_Risk_App/mb_app/precomp_g34late_fit.rds")
+ .g34late_df  <- readRDS("./mb_app/precomp_g34late_df.rds")
+ .g34late_fit <- readRDS("./mb_app/precomp_g34late_fit.rds")
  
  .g34late_env <- new.env(parent = baseenv())
  .g34late_env$surv.object.train.late <- Surv(.g34late_df$OS_Time, .g34late_df$OS_Status)
@@ -98,8 +98,8 @@ readRDS(file = "./mb_app/G3_G4_no_subgroup.model.rds") -> G3_G4_no_sub
  environment(.g34late_fit$terms)     <- .g34late_env
  
  # G3G4 early
- .g34early_df  <- readRDS("~/MB_Risk_App/mb_app/precomp_g34early_df.rds")
- .g34early_fit <- readRDS("~/MB_Risk_App/mb_app/precomp_g34early_fit.rds")
+ .g34early_df  <- readRDS("./mb_app/precomp_g34early_df.rds")
+ .g34early_fit <- readRDS("./mb_app/precomp_g34early_fit.rds")
  
  .g34early_df$ConsensusMYC <- factor(
    .g34early_df$ConsensusMYC,
