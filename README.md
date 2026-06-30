@@ -111,7 +111,7 @@ Then in the browser:
 1. **Upload IDATs.** Select the IDAT files for your sample(s). Each sample needs
    **both** the `_Grn.idat` and `_Red.idat` files; filenames must share the same
    sentrix basename (e.g. `200xxxx_R01C01_Grn.idat` and `..._Red.idat`).
-2. **Select a model** (SHH / G3_G4_sub / G3_G4_no_sub).
+2. **Select a model** (SHH / Group 3/4 (early) / Group 3/4 (late)).
 3. **Run analysis.** Processing runs in the background; progress is shown on the
    bar. The Results and Download tabs appear when finished.
 4. **Review** the risk table, distribution plot, and survival readout.
