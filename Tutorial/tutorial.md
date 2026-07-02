@@ -39,8 +39,8 @@ currently selected sample highlighted in orange.
 The green box shows the currently selected metagene model. It also contains an editable 
 covariate table which allows you to set clinical information for each sample individually:
 
-- **SHH model** — set MYCN amplification status (yes/no) per sample
-- **Group3/4 (Early) model** — set MYC amplification status and metastatic status (yes/no) per sample
+- **SHH model** — set *MYCN* amplification status (yes/no) per sample
+- **Group3/4 (Early) model** — set *MYC* amplification status and metastatic status (yes/no) per sample
 - **Group3/4 (Late) model** — no covariates required
 
 ![Selections](Selections.png)
