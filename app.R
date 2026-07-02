@@ -57,7 +57,7 @@ ui <- fluidPage(
       div(style = "font-size: 12px;",
           HTML("
             <b>Author:</b> James Hacking<br/>
-            <b>Date:</b> 12-06-2026<br/>
+            <b>Date:</b> 02-07-2026<br/>
             <b>Disclaimer : This app is designed exclusively for research purposes and is strictly not for diagnostic or clinical use.
           "),
           HTML(

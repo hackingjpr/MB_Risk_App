@@ -3,8 +3,7 @@ Upload your idat files (unzipped only), including both red and green channel fil
 
 ![Upload](Step1_upload.png)
 
-Upload a minimum of two samples. Increasing the number of samples will increase processing time, 
-so we recommend batches of ~10 samples for the best experience.
+Increasing the number of samples uploaded will increase processing time, so we recommend batches of ~10 samples for the best experience.
 
 # Step Two - Selecting a Model
 Select the model appropriate for your samples. Three models are available:
