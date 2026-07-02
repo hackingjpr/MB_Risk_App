@@ -54,14 +54,18 @@ alongside the early 5-year estimate.
 ├── ExampleDataScript.R             # Headless, scriptable end-to-end example
 ├── introduction.md                 # Intro tab content
 ├── Tutorial/tutorial.md            # Tutorial tab content
-└── mb_app/
+└── mb_app/slim/
     ├── SHHn49.model.rds            # SHH signature: CpGs, weights, scaling
     ├── G3_G4_subgroup.model.rds    # G3/4 (Early) signature
     ├── G3_G4_no_subgroup.model.rds # G3/4 (Late) signature
     ├── *.dist.rds                  # Reference-cohort score distributions
     ├── shh49.train.fit.rds         # Cox model: SHH 5-year OS
     ├── g34early19.train.fit.rds    # Cox model: G3/4 early 5-year OS
+    ├── g34early_slim.rds           # G3/4 (Early) Survival object
+    ├── g34late_slim.rds            # G3/4 (Late) Survival object
+    ├── shh_slim.rds                # SHH Survival object
     └── g34late49.train.fit.rds     # Cox model: G3/4 late 10-year mortality
+    
 ```
 
 > Some `.rds` files are large and may be tracked with
