@@ -36,8 +36,7 @@ together rather than in isolation.
 A predicted 5-year OS of, say, **80%** means that, *on average*, cases with a
 profile like this one were alive at five years 80% of the time in our reference
 cohorts. It describes a group, not a certainty for any one patient, and it
-carries statistical uncertainty (shown, where available, as a confidence
-interval). The estimate is most reliable when the sample resembles the cases the
+carries statistical uncertainty. The estimate is most reliable when the sample resembles the cases the
 models were built on — the correct molecular subgroup, comparable assay quality,
 and a similar treatment context.
 
