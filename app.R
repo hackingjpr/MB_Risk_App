@@ -352,41 +352,18 @@ server <- function(input, output, session) {
     
     output$selected_surv_value <- renderText({
       req(survInputs$score, survInputs$covariates)
-      score    <- survInputs$score
       covs     <- survInputs$covariates
       indexRow <- survInputs$indexRow
       metagene <- input$metagenes
       tryCatch({
-        if (metagene == "SHH") {
-          fit <- survfit(.shh_fit,
-                         newdata = data.frame(
-                           fixedMG       = as.numeric(score[indexRow]),
-                           ConsensusMYCN = as.numeric(covs$mycn[indexRow])
-                         ))
-          val <- as.numeric(summary(fit, time = 5)$surv)
-          paste0(round(val * 100, 1), "% at 5 years")
-          
-        } else if (metagene == "Group3/4 (Early)") {
-          new_row <- data.frame(
-            fixedMG      = as.numeric(score[indexRow]),
-            M._versus_M. = as.numeric(covs$mets[indexRow]),
-            ConsensusMYC = factor(
-              paste0("ConsensusMYC=", covs$myc[indexRow]),
-              levels = .g34early_fit$xlevels[["strata(ConsensusMYC)"]]
-            )
-          )
-          fit <- survfit(.g34early_fit, newdata = new_row)
-          val <- as.numeric(summary(fit, time = 5)$surv)
-          paste0(round(val * 100, 1), "% at 5 years")
-          
-        } else {
-          fit <- survfit(.g34late_fit,
-                         newdata = data.frame(
-                           fixedMG = as.numeric(score[indexRow])
-                         ))
-          val <- as.numeric(summary(fit, time = 10)$surv)
-          paste0(round(val * 100, 1), "% at 10 years")
-        }
+        val <- mb_surv_prob(
+          metagene,
+          score = survInputs$score[indexRow],
+          mycn  = if (!is.null(covs$mycn)) covs$mycn[indexRow] else 0,
+          myc   = if (!is.null(covs$myc))  covs$myc[indexRow]  else 0,
+          mets  = if (!is.null(covs$mets)) covs$mets[indexRow] else 0)
+        lm <- if (metagene == "Group3/4 (Late)") 10 else 5
+        paste0(round(val * 100, 1), "% at ", lm, " years")
       }, error = function(e) "Unable to compute")
     })
     
@@ -559,39 +536,15 @@ server <- function(input, output, session) {
         
         # Selected sample survival value for annotation
         surv_label <- tryCatch({
-          if (metagene == "SHH") {
-            fit <- survfit(.shh_fit,
-                           newdata = data.frame(
-                             fixedMG       = as.numeric(score[indexRow]),
-                             ConsensusMYCN = as.numeric(covs$mycn[indexRow])
-                           ))
-            val <- as.numeric(summary(fit, time = 5)$surv)
-            paste0("Selected sample: ", covs$sample[indexRow],
-                   " — Estimated 5-year survival: ", round(val * 100, 1), "%")
-            
-          } else if (metagene == "Group3/4 (Early)") {
-            new_row <- data.frame(
-              fixedMG      = as.numeric(score[indexRow]),
-              M._versus_M. = as.numeric(covs$mets[indexRow]),
-              ConsensusMYC = factor(
-                paste0("ConsensusMYC=", covs$myc[indexRow]),
-                levels = .g34early_fit$xlevels[["strata(ConsensusMYC)"]]
-              )
-            )
-            fit <- survfit(.g34early_fit, newdata = new_row)
-            val <- as.numeric(summary(fit, time = 5)$surv)
-            paste0("Selected sample: ", covs$sample[indexRow],
-                   " — Estimated 5-year survival: ", round(val * 100, 1), "%")
-            
-          } else {
-            fit <- survfit(.g34late_fit,
-                           newdata = data.frame(
-                             fixedMG = as.numeric(score[indexRow])
-                           ))
-            val <- as.numeric(summary(fit, time = 10)$surv)
-            paste0("Selected sample: ", covs$sample[indexRow],
-                   " — Estimated 10-year survival: ", round(val * 100, 1), "%")
-          }
+          val <- mb_surv_prob(
+            metagene,
+            score = score[indexRow],
+            mycn  = if (!is.null(covs$mycn)) covs$mycn[indexRow] else 0,
+            myc   = if (!is.null(covs$myc))  covs$myc[indexRow]  else 0,
+            mets  = if (!is.null(covs$mets)) covs$mets[indexRow] else 0)
+          lm <- if (metagene == "Group3/4 (Late)") 10 else 5
+          paste0("Selected sample: ", covs$sample[indexRow],
+                 " — Estimated ", lm, "-year survival: ", round(val * 100, 1), "%")
         }, error = function(e) "Survival estimate unavailable")
         
         pdf(file, width = 14, height = 12)
