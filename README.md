@@ -56,8 +56,8 @@ alongside the early 5-year estimate.
 ├── Tutorial/tutorial.md            # Tutorial tab content
 └── mb_app/slim/
     ├── SHHn49.model.rds            # SHH signature: CpGs, weights, scaling
-    ├── G3_G4_subgroup.model.rds    # G3/4 (Early) signature
-    ├── G3_G4_no_subgroup.model.rds # G3/4 (Late) signature
+    ├── g34early12_model.rds        # G3/4 (Early) signature
+    ├── g34late11_model.rds         # G3/4 (Late) signature
     ├── *.dist.rds                  # Reference-cohort score distributions
     ├── shh49.train.fit.rds         # Cox model: SHH 5-year OS
     ├── g34early19.train.fit.rds    # Cox model: G3/4 early 5-year OS
