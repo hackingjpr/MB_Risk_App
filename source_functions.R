@@ -76,8 +76,8 @@ invisible(lapply(cran_pkgs, install_and_load))
 message("packages loaded")
 
 # ── Classifiers (clean: CpG weights + scaling) ───────────────────────────────
-G3_G4_sub    <- readRDS("./mb_app/slim/G3_G4_subgroup.model.rds")
-G3_G4_no_sub <- readRDS("./mb_app/slim/G3_G4_no_subgroup.model.rds")
+G3_G4_sub    <- readRDS("./mb_app/slim/g34early12_model.rds")
+G3_G4_no_sub <- readRDS("./mb_app/slim/g34late11_model.rds")
 SHH          <- readRDS("./mb_app/slim/SHHn49.model.rds")
 
 # ── Prediction-only survival payloads (no coxph fits, no per-patient frames) ──
